@@ -1,17 +1,22 @@
 #include "coroutine.h"
 #include <stdio.h>
 
+#include <android/log.h>
+#define MODULE_NAME  "LOGXX"
+#define LOGD(...) __android_log_print(ANDROID_LOG_ERROR, MODULE_NAME, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, MODULE_NAME, __VA_ARGS__)
+
 struct args {
 	int n;
 };
 
 static void
 foo(struct schedule * S, void *ud) {
-	struct args * arg = ud;
+	struct args * arg = (struct args *)ud;
 	int start = arg->n;
 	int i;
 	for (i=0;i<5;i++) {
-		printf("coroutine %d : %d\n",coroutine_running(S) , start + i);
+		LOGD("coroutine %d : %d\n",coroutine_running(S) , start + i);
 		coroutine_yield(S);
 	}
 }
@@ -23,12 +28,12 @@ test(struct schedule *S) {
 
 	int co1 = coroutine_new(S, foo, &arg1);
 	int co2 = coroutine_new(S, foo, &arg2);
-	printf("main start\n");
+	LOGD("main start\n");
 	while (coroutine_status(S,co1) && coroutine_status(S,co2)) {
 		coroutine_resume(S,co1);
 		coroutine_resume(S,co2);
 	} 
-	printf("main end\n");
+	LOGD("main end\n");
 }
 
 int 

@@ -22,28 +22,48 @@ LOCAL_SRC_FILES	:=    \
 	ucontext/aarch64/setcontext.S
 endif
 
+ifeq ($(TARGET_ARCH_ABI),x86)
+LOCAL_C_INCLUDES += ucontext/x86
+LOCAL_SRC_FILES	:=    \
+	ucontext/x86/makecontext.S \
+	ucontext/x86/sysdep.S \
+	ucontext/x86/swapcontext.S \
+	ucontext/x86/setcontext.S
+endif
+
 LOCAL_SRC_FILES += ucontext/breakpad_getcontext.S 
 LOCAL_SRC_FILES += cao.c
 
 LOCAL_LDLIBS	+=	-L$(SYSROOT)/usr/lib -llog -lz -g
-LOCAL_CPPFLAGS := -fexceptions -frtti
+LOCAL_CPPFLAGS := -fexceptions -w -frtti
 LOCAL_CFLAGS += -pie -fPIE -std=c99
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 LOCAL_ARM_MODE	:= arm
 endif
+
+ifeq ($(TARGET_ARCH_ABI),x86)
+LOCAL_DISABLE_FATAL_LINKER_WARNINGS := true
+LOCAL_LDFLAGS += -Wl,--no-warn-shared-textrel
+endif
 # include $(BUILD_STATIC_LIBRARY)
 include $(BUILD_SHARED_LIBRARY)
 
+
+# include $(CLEAR_VARS)
+# LOCAL_MODULE	:= cao
+# LOCAL_SRC_FILES := libcao.so
+# include $(PREBUILT_SHARED_LIBRARY)
+
 include $(CLEAR_VARS)
+NDK_TOOLCHAIN_VERSION := clang
 LOCAL_MODULE	:= shit
-LOCAL_C_INCLUDES += ucontext/arm
 LOCAL_SRC_FILES	:=    \
 	coroutine.c \
 	main.c
 
 LOCAL_LDLIBS	+=	-L$(SYSROOT)/usr/lib -llog -lz -g
 LOCAL_CPPFLAGS := -fexceptions -frtti
-LOCAL_CFLAGS += -pie -fPIE -std=c99
+LOCAL_CFLAGS += -pie -fPIE
 LOCAL_LDFLAGS += -pie -fPIE
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 LOCAL_ARM_MODE	:= arm
